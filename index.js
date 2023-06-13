@@ -1,3 +1,4 @@
+const { MongoClient, ServerApiVersion } = require('mongodb')
 const express = require('express')
 const app = express()
 const cors = require('cors')
@@ -13,7 +14,6 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.54e8hqg.mongodb.net/?retryWrites=true&w=majority`;
@@ -30,8 +30,29 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const taskCollection = client.db('taskDB').collection('task')
-    
+      
+      const taskCollection = client.db('taskDB').collection('task')
+
+
+    //   get all task api in the database 
+    app.get('/task/all', async(req,res)=>{
+        const allTaskResult = await taskCollection.find().toArray();
+        res.send(allTaskResult);
+    })
+    //   task add api in db save task
+      app.post('/task/add', async(req, res)=>{
+        const task = req.body;
+        if(!task){
+            res.status(400).send({error: true, message: 'No task data provided.'})
+        }
+        const taskAddedResult = await taskCollection.insertOne(task);
+        res.send(taskAddedResult);
+      } )
+
+    //   update a task 
+    app.put('/task/update', async(req,res)=> {
+        res.send({})
+    })
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
     console.log(
