@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 const express = require('express')
 const app = express()
 const cors = require('cors')
@@ -13,8 +13,6 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 app.use(express.json())
-
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.54e8hqg.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -49,10 +47,53 @@ async function run() {
         res.send(taskAddedResult);
       } )
 
-    //   update a task 
-    app.put('/task/update', async(req,res)=> {
-        res.send({})
+   
+    //   delete a task 
+    app.delete('/task/:id', async(req,res)=> {
+        const id = req.params.id;
+        if(!id){
+            res.status(400).send({error: true, message: 'No task found.'})
+        }
+        const query = {_id: new ObjectId(id)};
+        const result = await taskCollection.deleteOne(query);
+        res.send(result);
     })
+
+
+    // update info in task 
+    app.put('/task/update/:id', async(req, res) =>{
+      const id = req.params.id;
+      const body = req.body;
+
+      const query  = {_id: new ObjectId(id)};
+      const updatedTask = {
+        $set: {
+          task_title: body?.task_title,
+          task_description: body?.task_description
+        }
+      }
+      const option = {upsert: false}
+      const result = await taskCollection.updateOne(query, updatedTask, option)
+      res.send(result);
+      
+    })
+
+    // status change in task
+    app.patch('/task/status/:id', async(req,res)=>{
+      const id = req.params.id;
+      const {status} = req.body;
+      const query = {_id: new ObjectId(id)};
+      const updateStatus =  {
+        $set: {
+          status: status
+        }
+      }
+      const result = await taskCollection.updateOne(query, updateStatus)
+
+      res.send(result);
+
+    })
+    
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
     console.log(
