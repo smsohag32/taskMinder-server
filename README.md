@@ -4,7 +4,7 @@ The Task Minder server is responsible for handling the backend logic and API ope
 
 ## Live Link
 
-You can access the live version of Task Minder by following this link: [Task Minder Live]()
+You can access the live version of Task Minder by following this link: [Task Minder Live](https://taskminder-sm.netlify.app/)
 
 ## Features
 
